@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { translateText, translateWordLevel } from '@/lib/deepl'
+import { translateText, translateWordLevel } from '@/lib/translation'
 import { LangCode, TranslationMode } from '@/types'
 
 export async function POST(request: NextRequest) {
@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请输入要翻译的文字' }, { status: 400 })
     }
 
-    if (text.length > 5000) {
+    if (text.length > 500) {
       return NextResponse.json(
-        { error: '文本过长，建议分段翻译（≤5000字符）' },
+        { error: '文本过长，建议分段翻译（≤500字符）' },
         { status: 400 },
       )
     }

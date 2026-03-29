@@ -5,9 +5,7 @@ import Link from 'next/link'
 import LanguageSelector from './LanguageSelector'
 import ModeToggle from './ModeToggle'
 import { LangCode, TranslationMode, HistoryItem } from '@/types'
-import { hasApiKey } from '@/lib/apiKey'
 import { addHistoryItem, getHistory } from '@/lib/history'
-import ApiKeyPrompt from './ApiKeyPrompt'
 import Toast from './Toast'
 
 interface ToastState {
@@ -15,7 +13,7 @@ interface ToastState {
   type: 'success' | 'error'
 }
 
-function TranslationCardInner() {
+export default function TranslationCard() {
   const [fromLang, setFromLang] = useState<LangCode>('ZH')
   const [toLang, setToLang] = useState<LangCode>('EN')
   const [mode, setMode] = useState<TranslationMode>('full')
@@ -148,7 +146,7 @@ function TranslationCardInner() {
               mode === 'word' ? (
                 <div className="leading-relaxed">
                   {translatedText
-                    .split(/(\s+|(?=[.,!?;，。!?])|(?<=[.,!?;，。!?]))/)
+                    .split(/(\s+|(?=[.,!?;，。!?《》「」『』])|(?<=[.,!?;，。!?《》「」『』]))/)
                     .filter(Boolean)
                     .map((word, i) => (
                       <span
@@ -213,22 +211,4 @@ function TranslationCardInner() {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
-}
-
-export default function TranslationCard() {
-  const [keyReady, setKeyReady] = useState(false)
-
-  useEffect(() => {
-    setKeyReady(true)
-  }, [])
-
-  if (!keyReady) {
-    return <div className="bg-white rounded-card shadow-card p-6 min-h-[300px]" />
-  }
-
-  if (!hasApiKey()) {
-    return <ApiKeyPrompt />
-  }
-
-  return <TranslationCardInner />
 }
