@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --primary: #4F46E5;
+  --primary-light: #EEF2FF;
+  --success: #10B981;
+  --error: #EF4444;
+  --text-main: #111827;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: "Inter", "PingFang SC", system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+::selection {
+  background-color: #c7d2fe;
+  color: var(--text-main);
+}
