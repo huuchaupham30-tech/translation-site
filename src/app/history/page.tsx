@@ -1,37 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getHistory, clearHistory, searchHistory } from '@/lib/history'
 import HistoryItemCard from '@/components/HistoryItem'
 import CornerDecorations from '@/components/CornerDecorations'
 import Toast from '@/components/Toast'
 import { useRouter } from 'next/navigation'
+import type { HistoryItem } from '@/types'
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [total, setTotal] = useState(0)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [historyItems, setHistoryItems] = useState<import('@/types').HistoryItem[]>([])
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([])
   const router = useRouter()
 
-  function loadHistory() {
-    if (searchQuery.trim()) {
-      setHistoryItems(searchHistory(searchQuery))
-    } else {
-      setHistoryItems(getHistory())
-    }
+  const loadHistory = useCallback(() => {
+    const items = searchQuery.trim()
+      ? searchHistory(searchQuery)
+      : getHistory()
+    setHistoryItems(items)
     setTotal(getHistory().length)
-  }
-
-  useEffect(() => {
-    loadHistory()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    loadHistory()
   }, [searchQuery])
+
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
 
   function handleClear() {
     clearHistory()
@@ -41,7 +36,7 @@ export default function HistoryPage() {
     setToast({ message: '历史已清空', type: 'success' })
   }
 
-  function handleRestore(item: import('@/types').HistoryItem) {
+  function handleRestore(item: HistoryItem) {
     router.push(`/?restore=${item.id}`)
   }
 

@@ -15,7 +15,7 @@ interface ToastState {
   type: 'success' | 'error'
 }
 
-export default function TranslationCard() {
+function TranslationCardInner() {
   const [fromLang, setFromLang] = useState<LangCode>('ZH')
   const [toLang, setToLang] = useState<LangCode>('EN')
   const [mode, setMode] = useState<TranslationMode>('full')
@@ -26,11 +26,6 @@ export default function TranslationCard() {
   const [toast, setToast] = useState<ToastState | null>(null)
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([])
 
-  if (!hasApiKey()) {
-    return <ApiKeyPrompt />
-  }
-
-  // 加载最近3条历史
   useEffect(() => {
     setRecentHistory(getHistory().slice(0, 3))
   }, [])
@@ -57,13 +52,7 @@ export default function TranslationCard() {
       }
 
       setTranslatedText(data.translatedText)
-      addHistoryItem({
-        fromLang,
-        toLang,
-        sourceText,
-        translatedText: data.translatedText,
-        mode,
-      })
+      addHistoryItem({ fromLang, toLang, sourceText, translatedText: data.translatedText, mode })
       setRecentHistory(getHistory().slice(0, 3))
       setError('')
     } catch (err: unknown) {
@@ -106,7 +95,7 @@ export default function TranslationCard() {
   }
 
   return (
-    <div className="bg-white rounded-card shadow-card p-6 relative">
+    <div className="bg-white rounded-card shadow-card p-6">
       {/* 语言选择行 */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <LanguageSelector value={fromLang} onChange={setFromLang} label="源语言" />
@@ -137,10 +126,7 @@ export default function TranslationCard() {
             }}
           />
           <div className="flex items-center justify-between mt-2">
-            <button
-              onClick={handleClear}
-              className="text-xs text-[#6B7280] hover:text-[#111827] transition-colors"
-            >
+            <button onClick={handleClear} className="text-xs text-[#6B7280] hover:text-[#111827] transition-colors">
               清除
             </button>
             <button
@@ -168,7 +154,6 @@ export default function TranslationCard() {
                       <span
                         key={i}
                         className="hover:bg-[#EEF2FF] hover:text-[#4F46E5] rounded px-0.5 cursor-default transition-colors"
-                        title={word}
                       >
                         {word}
                       </span>
@@ -187,7 +172,7 @@ export default function TranslationCard() {
               disabled={!translatedText}
               className="text-xs text-[#6B7280] hover:text-[#4F46E5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              📋 {translatedText ? '复制' : '复制'}
+              📋 复制
             </button>
           </div>
         </div>
@@ -207,36 +192,43 @@ export default function TranslationCard() {
               <button
                 key={item.id}
                 onClick={() => handleRestore(item)}
-                className="w-full text-left px-3 py-2 rounded-btn hover:bg-[#F9FAFB] transition-colors text-xs group"
+                className="w-full text-left px-3 py-2 rounded-btn hover:bg-[#F9FAFB] transition-colors text-xs"
               >
                 <span className="text-[#111827] line-clamp-1">
-                  {item.sourceText.slice(0, 30)}
-                  {item.sourceText.length > 30 ? '...' : ''}
+                  {item.sourceText.slice(0, 30)}{item.sourceText.length > 30 ? '...' : ''}
                 </span>
                 <span className="text-[#9CA3AF] mx-2">→</span>
                 <span className="text-[#6B7280] line-clamp-1">
-                  {item.translatedText.slice(0, 30)}
-                  {item.translatedText.length > 30 ? '...' : ''}
+                  {item.translatedText.slice(0, 30)}{item.translatedText.length > 30 ? '...' : ''}
                 </span>
               </button>
             ))}
-            <Link
-              href="/history"
-              className="block text-center text-xs text-[#4F46E5] hover:underline pt-1"
-            >
+            <Link href="/history" className="block text-center text-xs text-[#4F46E5] hover:underline pt-1">
               查看全部 →
             </Link>
           </div>
         )}
       </div>
 
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
+}
+
+export default function TranslationCard() {
+  const [keyReady, setKeyReady] = useState(false)
+
+  useEffect(() => {
+    setKeyReady(true)
+  }, [])
+
+  if (!keyReady) {
+    return <div className="bg-white rounded-card shadow-card p-6 min-h-[300px]" />
+  }
+
+  if (!hasApiKey()) {
+    return <ApiKeyPrompt />
+  }
+
+  return <TranslationCardInner />
 }
